@@ -7,3 +7,6 @@ Set up a virtual environment
 
 Activate (For MacOS/Linux)
 `source venv/bin/activate`
+
+Run the app
+`python3 run.py`

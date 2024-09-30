@@ -4,20 +4,41 @@ from app.source_code_analyzer.source_code_analyzer import SourceCodeAnalyzer
 from app.ranking_component.ranking_component import RankingComponent
 
 class ConcreteMediator:
-    def __init__(self):
-        self.apiList = APIList()
-        self.docParser = DocumentationParser()
-        self.sourceCodeAnalyzer = SourceCodeAnalyzer()
-        self.rankingComponent = RankingComponent()
+    def __init__(self, url):
+        #self.docParser = DocumentationParser()
+        #self.sourceCodeAnalyzer = SourceCodeAnalyzer()
+        #self.rankingComponent = RankingComponent()
+        self.url = url
+        self.currentStage = 1
+    
+    # Called by the first POST request /start
+    def beginAnalysis(self):
+        return self._beginDocParser(self.url)
+    
+    def checkStatus(self, id):
+        # currentStage gets updates inside private methods
+        return self.currentStage
 
-    def beginDocParser(self):
+
+    def _beginDocParser(self, url):
         # Start documentation parsing
-        self.apiList = self.docParser.submitURL("some_url")
+        # Doc parser component returns a populated APIList object.
+        self.docParser = DocumentationParser()
+        self.apiList = self.docParser.submitURL(self.url)
+        del self.docParser
 
-    def beginSourceCodeAnalyzer(self):
+        if self.apiList:
+            return self.apiList
+        else:
+            return None # API list creation failed
+
+        # TODO: Begin source code analysis
+        self.currentStage = 2
+
+    def _beginSourceCodeAnalyzer(self):
         # Start source code analysis
         self.sourceCodeAnalyzer.analyze(self.apiList)
 
-    def beginRanker(self):
+    def _beginRanker(self):
         # Start ranking
         return self.rankingComponent.createJSON()
