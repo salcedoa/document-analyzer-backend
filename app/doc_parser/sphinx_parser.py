@@ -16,14 +16,17 @@ class SphinxParser:
         
         # 1. Collect module names and links.
         modules = self._collectModules()
-        if len(modules) == 0:
+        if not modules:
             print("Module list was empty")
             return None
 
         # 2. Go though each module page and collect classes and methods
-        classList = []
+        classList = set() # Parsing method retrns duplicates, so we use a set.
         methodList = []
         for name, modLink in modules:
+
+            self.list.addModuleName(name) # Add module name to APIList for later SearchCode ID collection.
+
             modulePage = urljoin(self.url, modLink)
             response = requests.get(modulePage)
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -34,12 +37,20 @@ class SphinxParser:
                 classLink = element.find(class_='headerlink')['href']
                 className = element.find(class_='sig sig-object py').get_text().replace('¶', '')
                 if className.split()[0] == 'class':
+                    # Cut the parentheses from the class name
+                    className = className.split('(')[0]
+
+                    # Cut the "class " from the class name
+                    className = className[7:]
+
                     # "Class " is cut from the name.
-                    classList.append((className[7:], urljoin(modulePage, classLink)))
+                    classList.add((className, urljoin(modulePage, classLink)))
             
                     # Collect methods
                     singleName = element.find(class_='sig-name descname').get_text()
                     methodList.extend(self._collectMethods(element, singleName))     
+            # Convert classList to a list of tuples
+        classList = list(classList)
 
         # 3. Add classes to APIList
         for name, link in classList:

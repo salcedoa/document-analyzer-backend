@@ -13,31 +13,42 @@ class ConcreteMediator:
     
     # Called by the first POST request /start
     def beginAnalysis(self):
-        return self._beginDocParser(self.url)
+        return self._beginDocParser()
     
-    def checkStatus(self, id):
+    def checkStatus(self):
         # currentStage gets updates inside private methods
         return self.currentStage
 
+    def getAPIList(self):
+        # Returns the APIList object
+        return self.apiList
 
-    def _beginDocParser(self, url):
+    def _beginDocParser(self):
         # Start documentation parsing
         # Doc parser component returns a populated APIList object.
         self.docParser = DocumentationParser()
-        self.apiList = self.docParser.submitURL(self.url)
+        self.apiList = self.docParser.submitURL(self.url) # Note that URL must end in a forward slash to work.
         del self.docParser
 
         if self.apiList:
-            return self.apiList
+            # Begin source code analysis
+            self.currentStage = 2
+            return self._beginSourceCodeAnalyzer()
         else:
             return None # API list creation failed
 
-        # TODO: Begin source code analysis
-        self.currentStage = 2
-
     def _beginSourceCodeAnalyzer(self):
         # Start source code analysis
-        self.sourceCodeAnalyzer.analyze(self.apiList)
+        self.sourceCodeAnalyzer = SourceCodeAnalyzer()
+        self.apiList = self.sourceCodeAnalyzer.analyze(self.apiList) # Returns APIList object
+        if self.apiList:
+            # Begin ranking
+            self.currentStage = 3
+            print(self.apiList.to_json())
+
+            return self.apiList # RETURNS ERROR 400
+        else:
+            return None # Source code analysis failed
 
     def _beginRanker(self):
         # Start ranking
