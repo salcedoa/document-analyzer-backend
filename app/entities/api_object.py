@@ -29,5 +29,6 @@ class APIObject:
         return {
             "name": self.fullName,
             "type": self.type,
-            "appearances": self.appearances
+            "appearances": self.appearances,
+            "link": self.link
         }

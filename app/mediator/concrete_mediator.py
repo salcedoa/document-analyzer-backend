@@ -46,7 +46,7 @@ class ConcreteMediator:
             self.currentStage = 3
             print(self.apiList.to_json())
 
-            return self.apiList # RETURNS ERROR 400
+            return self.apiList
         else:
             return None # Source code analysis failed
 

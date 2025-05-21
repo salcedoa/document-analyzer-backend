@@ -1,11 +1,13 @@
 from flask import Flask, request
 from flask_restx import Api, Resource, fields
+from flask_cors import CORS
 from uuid import uuid4
 from app.mediator.concrete_mediator import ConcreteMediator
 import threading
 
 # Initialize Flask and Flask-RESTx
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 api = Api(app, version='1.0', title='Documentation Analyzer API',
           description='The backend component for the documentation analyzer.')
 
